@@ -157,6 +157,8 @@ La app recibe los privilegios en el login y los guarda con la sesión. `Permisos
 
 **¿Por qué subir antes de bajar?** Si se bajara primero, la copia local se reemplazaría con datos del servidor que aún no conocen lo registrado sin señal: el punto volvería a "por pesar" y una corrección hecha offline sería pisada por el valor viejo.
 
+**SC-D (distintivo de pendientes):** la consulta observable `contarPendientes` (`SELECT COUNT(*) FROM pesaje WHERE pendiente = 1`) llega por `PesajeRepository.observarPendientes()` y `ObservarPendientesUseCase` a `RutaUiState.pendientesPorEnviar`, que se pinta como `Badge` sobre el botón de sincronizar. El ViewModel no lleva ningún contador: el número cambia solo cuando cambia la tabla (al registrar o al sincronizar).
+
 Se dispara **manualmente** (botón ⟳) y **automáticamente** cuando `MonitorDeRedAndroid` detecta que volvió la conexión, al iniciar sesión. Un `Mutex` impide dos sincronizaciones simultáneas, y la `claveCliente` (UUID) hace que un reenvío nunca duplique el pesaje en el servidor.
 
 ---

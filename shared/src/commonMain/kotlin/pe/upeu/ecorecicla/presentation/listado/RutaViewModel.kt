@@ -18,6 +18,7 @@ import pe.upeu.ecorecicla.domain.model.Resultado
 import pe.upeu.ecorecicla.domain.model.Ruta
 import pe.upeu.ecorecicla.domain.repository.MonitorDeRed
 import pe.upeu.ecorecicla.domain.usecase.CerrarRutaUseCase
+import pe.upeu.ecorecicla.domain.usecase.ObservarPendientesUseCase
 import pe.upeu.ecorecicla.domain.usecase.ObservarRutaUseCase
 import pe.upeu.ecorecicla.domain.usecase.ObservarSesionUseCase
 import pe.upeu.ecorecicla.domain.usecase.ObservarUltimaSincronizacionUseCase
@@ -35,6 +36,8 @@ data class RutaUiState(
     val conectado: Boolean = true,
     val puedeCerrarRuta: Boolean = false,
     val nombreUsuario: String = "",
+    /** SC-D: pesajes guardados en el equipo que aun no llegan al servidor. */
+    val pendientesPorEnviar: Long = 0,
     val mensaje: String? = null,
     val error: MensajeError? = null
 ) {
@@ -55,7 +58,8 @@ class RutaViewModel(
     private val cerrarRutaUseCase: CerrarRutaUseCase,
     private val observarSesion: ObservarSesionUseCase,
     private val permisos: PermisosUseCase,
-    private val red: MonitorDeRed
+    private val red: MonitorDeRed,
+    private val observarPendientes: ObservarPendientesUseCase
 ) : ViewModel() {
 
     private val _estado = MutableStateFlow(RutaUiState())
@@ -77,6 +81,10 @@ class RutaViewModel(
             observarSesion().collect { s ->
                 _estado.update { it.copy(puedeCerrarRuta = permisos.puedeCerrarRuta(s), nombreUsuario = s?.nombre.orEmpty()) }
             }
+        }
+        // SC-D: el numero lo da la consulta observable; el ViewModel no lleva ningun contador propio.
+        viewModelScope.launch {
+            observarPendientes().collect { n -> _estado.update { it.copy(pendientesPorEnviar = n) } }
         }
         // Sincronizacion automatica al recuperar la conexion (transicion sin red -> con red).
         viewModelScope.launch {

@@ -2,6 +2,7 @@ package pe.upeu.ecorecicla.data.repository
 
 import app.cash.sqldelight.coroutines.asFlow
 import app.cash.sqldelight.coroutines.mapToList
+import app.cash.sqldelight.coroutines.mapToOne
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
@@ -48,6 +49,9 @@ class PesajeRepositoryImpl(
 
     override fun observarPesajes(puntoId: Long): Flow<List<Pesaje>> =
         q.pesajesDePunto(puntoId).asFlow().mapToList(io).map { filas -> filas.map { it.aDominio() } }
+
+    override fun observarPendientes(): Flow<Long> =
+        q.contarPendientes().asFlow().mapToOne(io)
 
     override suspend fun obtener(pesajeId: Long): Pesaje? = withContext(io) {
         q.pesajePorId(pesajeId).executeAsOneOrNull()?.aDominio()

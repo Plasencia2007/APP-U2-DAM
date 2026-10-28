@@ -53,6 +53,9 @@ interface PesajeRepository {
 
     suspend fun anular(pesajeId: Long, motivo: String): Resultado<RegistroPesaje>
 
+    /** SC-D: numero de pesajes pendientes de sincronizar, observado desde la base local. */
+    fun observarPendientes(): Flow<Long>
+
     /** Descarta un pesaje que nunca llego al servicio (fila provisional). */
     suspend fun descartarPendiente(pesajeId: Long)
 }

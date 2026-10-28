@@ -26,6 +26,7 @@ import pe.upeu.ecorecicla.domain.usecase.CerrarSesionUseCase
 import pe.upeu.ecorecicla.domain.usecase.CorregirPesajeUseCase
 import pe.upeu.ecorecicla.domain.usecase.DescartarPendienteUseCase
 import pe.upeu.ecorecicla.domain.usecase.IniciarSesionUseCase
+import pe.upeu.ecorecicla.domain.usecase.ObservarPendientesUseCase
 import pe.upeu.ecorecicla.domain.usecase.ObservarPesajesUseCase
 import pe.upeu.ecorecicla.domain.usecase.ObservarPuntoUseCase
 import pe.upeu.ecorecicla.domain.usecase.ObservarRutaUseCase
@@ -84,6 +85,7 @@ val domainModule = module {
     factory { CerrarRutaUseCase(get()) }
     factory { ObservarPesajesUseCase(get()) }
     factory { ObtenerPesajeUseCase(get()) }
+    factory { ObservarPendientesUseCase(get()) }
     factory { RegistrarPesajeUseCase(get()) }
     factory { CorregirPesajeUseCase(get()) }
     factory { AnularPesajeUseCase(get()) }
