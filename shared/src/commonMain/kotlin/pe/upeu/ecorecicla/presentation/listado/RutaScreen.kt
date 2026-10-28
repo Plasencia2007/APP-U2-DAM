@@ -29,7 +29,9 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.ChevronRight
+import androidx.compose.material.icons.filled.FilterList
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Place
 import androidx.compose.material.icons.filled.Recycling
@@ -38,6 +40,8 @@ import androidx.compose.material.icons.filled.Sync
 import androidx.compose.material.icons.filled.WarningAmber
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.FilterChip
+import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -89,11 +93,12 @@ fun RutaScreen(
 
         when {
             estado.cargando -> Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) { CircularProgressIndicator() }
-            ruta == null && estado.busqueda.isBlank() -> SinRuta(estado.conectado, estado.sincronizando, vm::sincronizar)
+            ruta == null && !estado.filtrando -> SinRuta(estado.conectado, estado.sincronizando, vm::sincronizar)
             else -> Column(Modifier.fillMaxSize()) {
                 // Buscador y avisos fijos: no se desplazan con la lista.
                 Column(Modifier.padding(start = 16.dp, end = 16.dp, top = 16.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
                     Buscador(estado.busqueda, vm::buscar)
+                    FiltroPendientes(estado.soloPendientes, estado.totalParadas - estado.pesados, vm::alternarSoloPendientes)
                     BannerMensajes(estado.mensaje, estado.error, alReintentar = vm::sincronizar, alCerrar = vm::descartarMensajes)
                 }
                 LazyColumn(
@@ -105,7 +110,11 @@ fun RutaScreen(
                 }
                 item {
                     Text(
-                        if (estado.busqueda.isBlank()) "Paradas en orden de visita" else "Resultados de la búsqueda",
+                        when {
+                            estado.soloPendientes -> "Paradas pendientes de pesar"
+                            estado.busqueda.isNotBlank() -> "Resultados de la búsqueda"
+                            else -> "Paradas en orden de visita"
+                        },
                         style = MaterialTheme.typography.titleSmall,
                         color = MaterialTheme.eco.textoSecundario,
                         modifier = Modifier.padding(top = 12.dp, bottom = 8.dp)
@@ -114,7 +123,10 @@ fun RutaScreen(
                 val puntos = ruta?.puntos.orEmpty()
                 if (puntos.isEmpty()) {
                     item {
-                        Text("Ninguna parada coincide con \"${estado.busqueda}\".", style = MaterialTheme.typography.bodyLarge,
+                        Text(
+                            if (estado.soloPendientes && estado.busqueda.isBlank()) "No quedan paradas pendientes: todas tienen pesaje."
+                            else "Ninguna parada coincide con el filtro.",
+                            style = MaterialTheme.typography.bodyLarge,
                             modifier = Modifier.padding(vertical = 24.dp))
                     }
                 }
@@ -127,7 +139,7 @@ fun RutaScreen(
                     )
                 }
                 // Solo se ofrece a quien tiene RUTA_CERRAR; el servicio vuelve a verificarlo (403 / 409 RN-04).
-                if (ruta != null && ruta.estado == EstadoRuta.ABIERTA && estado.puedeCerrarRuta && estado.busqueda.isBlank()) {
+                if (ruta != null && ruta.estado == EstadoRuta.ABIERTA && estado.puedeCerrarRuta && !estado.filtrando) {
                     item {
                         OutlinedButton(
                             onClick = { confirmarCierre = true },
@@ -246,6 +258,24 @@ private fun Avatar(nombre: String, alPulsar: () -> Unit) {
     ) {
         Text(iniciales.ifBlank { "?" }, style = MaterialTheme.typography.titleSmall, color = Paleta.Carbon)
     }
+}
+
+/** SC-A: chip "Solo pendientes de pesar"; el filtrado real ocurre en la consulta local. */
+@Composable
+private fun FiltroPendientes(activo: Boolean, pendientes: Int, alPulsar: () -> Unit) {
+    FilterChip(
+        selected = activo,
+        onClick = alPulsar,
+        label = { Text("Solo pendientes de pesar ($pendientes)") },
+        leadingIcon = { Icon(if (activo) Icons.Filled.Check else Icons.Filled.FilterList, contentDescription = null, modifier = Modifier.size(18.dp)) },
+        shape = MaterialTheme.shapes.small,
+        colors = FilterChipDefaults.filterChipColors(
+            containerColor = MaterialTheme.colorScheme.surface,
+            selectedContainerColor = MaterialTheme.eco.pendienteFondo,
+            selectedLabelColor = Color(0xFF6B4A00),
+            selectedLeadingIconColor = Color(0xFF6B4A00)
+        )
+    )
 }
 
 @Composable

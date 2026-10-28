@@ -8,7 +8,8 @@ import pe.upeu.ecorecicla.domain.repository.RutaRepository
 
 /** La ruta del dia se observa SIEMPRE desde la base local; la red solo alimenta esa base. */
 class ObservarRutaUseCase(private val rutas: RutaRepository) {
-    operator fun invoke(busqueda: String = ""): Flow<Ruta?> = rutas.observarRuta(busqueda.trim())
+    operator fun invoke(busqueda: String = "", soloPendientes: Boolean = false): Flow<Ruta?> =
+        rutas.observarRuta(busqueda.trim(), soloPendientes)
 }
 
 class ObservarPuntoUseCase(private val rutas: RutaRepository) {

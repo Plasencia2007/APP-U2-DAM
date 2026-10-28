@@ -33,14 +33,14 @@ class RutaRepositoryImpl(
     private val q get() = db.ecoDbQueries
 
     @OptIn(ExperimentalCoroutinesApi::class)
-    override fun observarRuta(busqueda: String): Flow<Ruta?> =
+    override fun observarRuta(busqueda: String, soloPendientes: Boolean): Flow<Ruta?> =
         q.rutaActual().asFlow().mapToOneOrNull(io).flatMapLatest { fila ->
             if (fila == null) {
                 flowOf(null)
             } else {
                 combine(
-                    q.puntosDeRuta(fila.id, busqueda).asFlow().mapToList(io),
-                    q.puntosDeRuta(fila.id, "").asFlow().mapToList(io),
+                    q.puntosDeRuta(fila.id, busqueda, if (soloPendientes) 1L else 0L).asFlow().mapToList(io),
+                    q.puntosDeRuta(fila.id, "", 0L).asFlow().mapToList(io),
                     q.netoTotalRuta(fila.id).asFlow().mapToOne(io)
                 ) { filtrados, todos, neto ->
                     Ruta(
