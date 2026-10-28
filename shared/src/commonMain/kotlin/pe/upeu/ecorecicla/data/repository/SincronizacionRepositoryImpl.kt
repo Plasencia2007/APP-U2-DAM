@@ -56,7 +56,7 @@ class SincronizacionRepositoryImpl(
     private suspend fun enviar(fila: FilaPesaje): Resultado<Unit> = when (fila.operacion) {
         Operacion.CREAR -> {
             val peticion = PesajePeticionDto(fila.ruta_id, fila.material, fila.peso_bruto, fila.tara, fila.observacion,
-                fila.clave_cliente)
+                fila.clave_cliente, fila.humedad_estimada)
             when (val r = api.registrarPesaje(fila.punto_id, peticion)) {
                 is Resultado.Exito -> {
                     withContext(io) {
@@ -71,7 +71,7 @@ class SincronizacionRepositoryImpl(
             }
         }
         Operacion.EDITAR -> {
-            val peticion = CorreccionPesajeDto(fila.material, fila.peso_bruto, fila.tara, fila.observacion)
+            val peticion = CorreccionPesajeDto(fila.material, fila.peso_bruto, fila.tara, fila.observacion, fila.humedad_estimada)
             when (val r = api.corregirPesaje(fila.id, peticion)) {
                 is Resultado.Exito -> {
                     withContext(io) { db.guardarPesaje(r.valor.aDominio()) }

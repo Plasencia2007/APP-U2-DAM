@@ -202,7 +202,8 @@ private fun TarjetaPesaje(ui: PesajeUi, alCorregir: () -> Unit, alAnular: () -> 
                         )
                     }
                     Spacer(Modifier.height(4.dp))
-                    Text("Bruto ${numeroKg(p.pesoBruto)} kg, tara ${numeroKg(p.tara)} kg",
+                    Text("Bruto ${numeroKg(p.pesoBruto)} kg, tara ${numeroKg(p.tara)} kg" +
+                        (p.humedadEstimada?.let { ", humedad ${numeroKg(it)} %" } ?: ""),
                         style = MaterialTheme.typography.bodyMedium, color = eco.textoSecundario)
                     Text("${hora(p.fechaHora)} por ${p.operario}", style = MaterialTheme.typography.bodySmall, color = eco.textoSecundario)
                     p.observacion?.let {

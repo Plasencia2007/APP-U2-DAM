@@ -16,7 +16,8 @@ data class DatosPesaje(
     val material: String,
     val pesoBruto: Double,
     val tara: Double,
-    val observacion: String?
+    val observacion: String?,
+    val humedadEstimada: Double? = null
 )
 
 /** Como termino el registro de un pesaje. */

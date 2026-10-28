@@ -160,10 +160,10 @@ class EcoRutasTest {
         val db = baseEnMemoria()
         assertEquals(-1, db.ecoDbQueries.siguienteIdProvisional().executeAsOne().MIN)
         db.ecoDbQueries.insertarPesaje(25, 1, 1, "2026-10-27T08:00:00", "Papel", 10.0, 1.0, 9.0, "op",
-            null, "REGISTRADO", null, false, null, null, null)
+            null, "REGISTRADO", null, false, null, null, null, null)
         assertEquals(-1, db.ecoDbQueries.siguienteIdProvisional().executeAsOne().MIN)
         db.ecoDbQueries.insertarPesaje(-1, 1, 1, "2026-10-27T08:00:00", "Papel", 10.0, 1.0, 9.0, "op",
-            null, "REGISTRADO", null, true, "CREAR", null, null)
+            null, "REGISTRADO", null, true, "CREAR", null, null, null)
         assertEquals(-2, db.ecoDbQueries.siguienteIdProvisional().executeAsOne().MIN)
     }
 }

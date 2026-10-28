@@ -49,5 +49,6 @@ fun PesajeDto.aDominio(): Pesaje = Pesaje(
     estado = if (estado == "ANULADO") EstadoPesaje.Anulado(motivoAnulacion.orEmpty()) else EstadoPesaje.Registrado,
     pendiente = false,
     rutaId = rutaId,
-    observacion = observacion
+    observacion = observacion,
+    humedadEstimada = humedadEstimada
 )

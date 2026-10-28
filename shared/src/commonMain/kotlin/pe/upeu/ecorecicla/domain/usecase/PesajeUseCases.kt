@@ -21,7 +21,7 @@ class ObtenerPesajeUseCase(private val pesajes: PesajeRepository) {
  * datos imposibles aun sin conexion. El neto se valida pero NUNCA se envia.
  */
 object ValidadorPesaje {
-    fun validar(material: String, pesoBruto: String, tara: String): Pair<DatosPesaje?, Map<String, String>> {
+    fun validar(material: String, pesoBruto: String, tara: String, humedad: String = ""): Pair<DatosPesaje?, Map<String, String>> {
         val errores = mutableMapOf<String, String>()
         val bruto = pesoBruto.replace(',', '.').trim().toDoubleOrNull()
         val t = tara.replace(',', '.').trim().toDoubleOrNull()
@@ -33,16 +33,20 @@ object ValidadorPesaje {
         if (bruto != null && t != null && bruto > 0 && t >= 0 && bruto - t <= 0) {
             errores["tara"] = "La tara debe ser menor que el peso bruto"
         }
+        // SC-C: humedad opcional, en porcentaje.
+        val h = humedad.replace(',', '.').trim().ifBlank { null }?.let { it.toDoubleOrNull() ?: -1.0 }
+        if (h != null && (h < 0 || h > 100)) errores["humedadEstimada"] = "La humedad debe estar entre 0 y 100 %"
         if (errores.isNotEmpty() || bruto == null || t == null) return null to errores
-        return DatosPesaje(material.trim(), bruto, t, null) to emptyMap()
+        return DatosPesaje(material.trim(), bruto, t, null, h) to emptyMap()
     }
 }
 
 class RegistrarPesajeUseCase(private val pesajes: PesajeRepository) {
     suspend operator fun invoke(
-        puntoId: Long, rutaId: Long, material: String, pesoBruto: String, tara: String, observacion: String
+        puntoId: Long, rutaId: Long, material: String, pesoBruto: String, tara: String, observacion: String,
+        humedad: String = ""
     ): Resultado<RegistroPesaje> {
-        val (datos, errores) = ValidadorPesaje.validar(material, pesoBruto, tara)
+        val (datos, errores) = ValidadorPesaje.validar(material, pesoBruto, tara, humedad)
         if (datos == null) return Resultado.Fallo(ErrorApi.Validacion("Revise los datos del formulario", errores))
         return pesajes.registrar(puntoId, rutaId, datos.copy(observacion = observacion.ifBlank { null }))
     }
@@ -50,9 +54,10 @@ class RegistrarPesajeUseCase(private val pesajes: PesajeRepository) {
 
 class CorregirPesajeUseCase(private val pesajes: PesajeRepository) {
     suspend operator fun invoke(
-        pesajeId: Long, material: String, pesoBruto: String, tara: String, observacion: String
+        pesajeId: Long, material: String, pesoBruto: String, tara: String, observacion: String,
+        humedad: String = ""
     ): Resultado<RegistroPesaje> {
-        val (datos, errores) = ValidadorPesaje.validar(material, pesoBruto, tara)
+        val (datos, errores) = ValidadorPesaje.validar(material, pesoBruto, tara, humedad)
         if (datos == null) return Resultado.Fallo(ErrorApi.Validacion("Revise los datos del formulario", errores))
         return pesajes.corregir(pesajeId, datos.copy(observacion = observacion.ifBlank { null }))
     }

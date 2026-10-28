@@ -90,7 +90,8 @@ data class PesajeDto(
     val operario: String,
     val estado: String,
     val motivoAnulacion: String? = null,
-    val claveCliente: String? = null
+    val claveCliente: String? = null,
+    val humedadEstimada: Double? = null
 )
 
 /** Peticion de registro. No existe campo de peso neto: el cliente nunca lo envia (RN-03). */
@@ -101,7 +102,8 @@ data class PesajePeticionDto(
     val pesoBruto: Double,
     val tara: Double,
     val observacion: String? = null,
-    val claveCliente: String? = null
+    val claveCliente: String? = null,
+    val humedadEstimada: Double? = null
 )
 
 @Serializable
@@ -109,5 +111,6 @@ data class CorreccionPesajeDto(
     val material: String,
     val pesoBruto: Double,
     val tara: Double,
-    val observacion: String? = null
+    val observacion: String? = null,
+    val humedadEstimada: Double? = null
 )

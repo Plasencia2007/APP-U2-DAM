@@ -90,6 +90,8 @@ androidApp/src/main/kotlin/pe/upeu/ecorecicla/
 | Anular pesaje | `DELETE /pesajes/{id}?motivo=` (204) | Diálogo "Anular" y pendientes `ANULAR` |
 | Cerrar ruta | `POST /rutas/{id}/cierre` | Botón "Cerrar ruta del día" (supervisor) |
 
+**SC-C (humedad estimada):** `humedadEstimada` viaja en `PesajeDto`, `PesajePeticionDto` y `CorreccionPesajeDto`; el dominio la agrega a `Pesaje` y `DatosPesaje`; la tabla local `pesaje` suma la columna `humedad_estimada` con la migración `1.sqm` (las instalaciones previas no pierden datos); el formulario la valida (0 a 100 %) y el detalle la muestra.
+
 Todos los listados llegan en el envoltorio `{contenido, pagina, tamanio, totalElementos, totalPaginas, ultima}` (`PaginaDto<T>`); por eso un listado nunca se deserializa como lista. Los errores llegan en el formato común `{timestamp, status, error, message, path, validationErrors}` (`ErrorDto`).
 
 ---
