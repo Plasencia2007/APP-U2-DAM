@@ -6,6 +6,7 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.flatMapLatest
@@ -30,6 +31,8 @@ data class RutaUiState(
     val cargando: Boolean = true,
     val ruta: Ruta? = null,
     val busqueda: String = "",
+    /** SC-A: mostrar solo las paradas pendientes de pesar. */
+    val soloPendientes: Boolean = false,
     val ultimaSincronizacion: String? = null,
     val sincronizando: Boolean = false,
     val conectado: Boolean = true,
@@ -38,6 +41,8 @@ data class RutaUiState(
     val mensaje: String? = null,
     val error: MensajeError? = null
 ) {
+    /** Hay algun filtro activo (buscador o solo pendientes). */
+    val filtrando: Boolean get() = busqueda.isNotBlank() || soloPendientes
     val vacia: Boolean get() = !cargando && (ruta == null || ruta.puntos.isEmpty())
     val pesados: Int get() = ruta?.pesados ?: 0
     val totalParadas: Int get() = ruta?.avance?.size ?: 0
@@ -62,11 +67,15 @@ class RutaViewModel(
     val estado: StateFlow<RutaUiState> = _estado.asStateFlow()
 
     private val busqueda = MutableStateFlow("")
+    private val soloPendientes = MutableStateFlow(false)
 
     init {
         @OptIn(ExperimentalCoroutinesApi::class)
         viewModelScope.launch {
-            busqueda.flatMapLatest { observarRuta(it) }.collect { ruta ->
+            // El filtro se resuelve en la consulta local (caso de uso -> repositorio -> SQL), no en el composable.
+            combine(busqueda, soloPendientes) { texto, pendientes -> texto to pendientes }
+                .flatMapLatest { (texto, pendientes) -> observarRuta(texto, pendientes) }
+                .collect { ruta ->
                 _estado.update { it.copy(cargando = false, ruta = ruta) }
             }
         }
@@ -98,6 +107,11 @@ class RutaViewModel(
     fun buscar(texto: String) {
         busqueda.value = texto
         _estado.update { it.copy(busqueda = texto) }
+    }
+
+    fun alternarSoloPendientes() {
+        soloPendientes.value = !soloPendientes.value
+        _estado.update { it.copy(soloPendientes = soloPendientes.value) }
     }
 
     fun sincronizar() {
