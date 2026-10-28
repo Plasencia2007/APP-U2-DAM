@@ -30,8 +30,11 @@ interface AuthRepository {
 }
 
 interface RutaRepository {
-    /** Ruta del dia leida de la base local, filtrada por el buscador. Flujo observable. */
-    fun observarRuta(busqueda: String): Flow<Ruta?>
+    /**
+     * Ruta del dia leida de la base local, filtrada por el buscador y, si se pide,
+     * solo con las paradas pendientes de pesar (SC-A). Flujo observable.
+     */
+    fun observarRuta(busqueda: String, soloPendientes: Boolean = false): Flow<Ruta?>
 
     fun observarPunto(puntoId: Long): Flow<PuntoAcopio?>
 
