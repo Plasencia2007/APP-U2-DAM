@@ -34,6 +34,8 @@ kotlin {
             implementation(libs.compose.foundation)
             implementation(libs.compose.material3)
             implementation(libs.compose.materialIconsCore)
+            implementation(libs.compose.materialIconsExtended)
+            implementation(libs.compose.components.resources)
             implementation(libs.compose.ui)
             implementation(libs.compose.uiToolingPreview)
             implementation(libs.androidx.lifecycle.viewmodelCompose)
@@ -59,6 +61,12 @@ kotlin {
             implementation(libs.sqldelight.jvm)
         }
     }
+}
+
+// Fuentes Barlow (OFL) empaquetadas como recursos de Compose.
+compose.resources {
+    packageOfResClass = "pe.upeu.ecorecicla.recursos"
+    publicResClass = false
 }
 
 sqldelight {
