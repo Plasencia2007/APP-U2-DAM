@@ -8,8 +8,14 @@ data class Ruta(
     val fecha: String,
     val estado: EstadoRuta,
     val operario: String,
-    val puntos: List<PuntoAcopio>
-)
+    val puntos: List<PuntoAcopio>,
+    /** Kilos netos recolectados en la ruta, segun la base local. */
+    val netoTotal: Double = 0.0,
+    /** Estado de TODA la ruta (independiente del buscador): una entrada por parada, true si ya se peso. */
+    val avance: List<Boolean> = puntos.map { it.atendido }
+) {
+    val pesados: Int get() = avance.count { it }
+}
 
 /** Resultado del paso de subida: cuantos pendientes llegaron y cuantos rechazo el servicio. */
 data class Subida(val enviados: Int, val rechazados: Int)

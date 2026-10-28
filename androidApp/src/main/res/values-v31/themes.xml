@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Android 12+: pantalla de inicio del sistema con el fondo y el icono de la marca. -->
+    <style name="Theme.EcoRutas" parent="android:Theme.Material.Light.NoActionBar">
+        <item name="android:windowBackground">@color/bosque</item>
+        <item name="android:statusBarColor">@android:color/transparent</item>
+        <item name="android:windowSplashScreenBackground">@color/bosque</item>
+        <item name="android:windowSplashScreenAnimatedIcon">@drawable/ic_launcher_foreground</item>
+    </style>
+</resources>

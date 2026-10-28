@@ -15,6 +15,7 @@ import pe.upeu.ecorecicla.domain.usecase.ObtenerPesajeUseCase
 import pe.upeu.ecorecicla.domain.usecase.RegistrarPesajeUseCase
 import pe.upeu.ecorecicla.presentation.MensajeError
 import pe.upeu.ecorecicla.presentation.aMensaje
+import pe.upeu.ecorecicla.presentation.numeroKg
 
 data class FormPesajeUiState(
     val puntoId: Long = 0,
@@ -83,8 +84,8 @@ class FormPesajeViewModel(
             when (r) {
                 is Resultado.Exito -> _estado.update {
                     it.copy(enviando = false, terminado = when (val v = r.valor) {
-                        is RegistroPesaje.Enviado -> "Pesaje guardado en el servidor (id ${v.pesaje.id}, neto ${v.pesaje.pesoNeto} kg)"
-                        is RegistroPesaje.Pendiente -> "Sin conexion: pesaje guardado en el equipo como pendiente (id ${v.pesaje.id})"
+                        is RegistroPesaje.Enviado -> "Pesaje guardado en el servidor (id ${v.pesaje.id}, neto ${numeroKg(v.pesaje.pesoNeto)} kg)"
+                        is RegistroPesaje.Pendiente -> "Sin conexión: pesaje guardado en el equipo como pendiente (id ${v.pesaje.id})"
                     })
                 }
                 is Resultado.Fallo -> _estado.update {
