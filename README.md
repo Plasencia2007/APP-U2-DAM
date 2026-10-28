@@ -161,6 +161,17 @@ Se dispara **manualmente** (botón ⟳) y **automáticamente** cuando `MonitorDe
 
 ---
 
-## 6. Flujo de Git
+## 6. Solicitudes de cambio (Parte II)
+
+Cada solicitud vive en su propia rama, creada desde `develop`, con tres commits (compila, funciona, verificada) y su PR abierto hacia `develop` para revisión.
+
+| Rama | Solicitud | Dónde está el cambio | Prueba |
+|---|---|---|---|
+| `sc-a-plasencia` | Filtro «Solo pendientes de pesar» | Consulta `puntosDeRuta(:busqueda, :soloPendientes)` → `ObservarRutaUseCase` → `RutaViewModel` | `FiltroPendientesTest` |
+| `sc-b-plasencia` | Rol AUDITOR | Sin cambios de interfaz: `PermisosUseCase` decide por privilegio | `PermisosAuditorTest` |
+| `sc-c-plasencia` | Humedad estimada | DTO, dominio, columna `humedad_estimada` + migración `1.sqm`, formulario y detalle | `HumedadEstimadaTest` |
+| `sc-d-plasencia` | Distintivo de pendientes | Consulta observable `contarPendientes` → `ObservarPendientesUseCase` → `Badge` | `PendientesPorEnviarTest` |
+
+## 7. Flujo de Git
 
 `main` (solo fusiones desde `develop`) · `develop` (integración) · `feature/*` · `fix/*` · `docs/*` · en el examen `sc-<letra>-<apellido>`. Fusiones con `--no-ff`; la versión evaluada se etiqueta `v1.0-unidad2`.

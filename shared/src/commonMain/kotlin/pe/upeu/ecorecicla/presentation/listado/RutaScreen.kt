@@ -140,7 +140,9 @@ fun RutaScreen(
                         }
                         Text(
                             if (estado.completa) "Todas las paradas tienen pesaje."
-                            else "Faltan ${estado.totalParadas - estado.pesados} paradas por pesar u omitir.",
+                            else (estado.totalParadas - estado.pesados).let { n ->
+                                if (n == 1) "Falta 1 parada por pesar u omitir." else "Faltan $n paradas por pesar u omitir."
+                            },
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.eco.textoSecundario,
                             modifier = Modifier.padding(top = 6.dp, start = 4.dp)
