@@ -114,7 +114,7 @@ class PesajeRepositoryImpl(
     override suspend fun anular(pesajeId: Long, motivo: String): Resultado<RegistroPesaje> {
         val actual = obtener(pesajeId) ?: return Resultado.Fallo(ErrorApi.NoEncontrado("El pesaje ya no existe"))
         if (actual.id < 0) {
-            return Resultado.Fallo(ErrorApi.Conflicto("Este pesaje aun no se envio al servidor: descartelo en lugar de anularlo"))
+            return Resultado.Fallo(ErrorApi.Conflicto("Este pesaje aún no se envió al servidor: descártelo en lugar de anularlo"))
         }
         if (red.conectado.value) {
             when (val r = api.anularPesaje(pesajeId, motivo)) {

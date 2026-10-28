@@ -10,7 +10,7 @@ class IniciarSesionUseCase(private val auth: AuthRepository) {
     suspend operator fun invoke(usuario: String, clave: String): Resultado<Sesion> {
         val errores = buildMap {
             if (usuario.isBlank()) put("username", "Ingrese su usuario")
-            if (clave.isBlank()) put("password", "Ingrese su contrasena")
+            if (clave.isBlank()) put("password", "Ingrese su contraseña")
         }
         if (errores.isNotEmpty()) return Resultado.Fallo(ErrorApi.Validacion("Datos incompletos", errores))
         return auth.iniciarSesion(usuario.trim(), clave)

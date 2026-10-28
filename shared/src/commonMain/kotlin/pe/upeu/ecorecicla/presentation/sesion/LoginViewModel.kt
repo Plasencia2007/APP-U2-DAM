@@ -48,9 +48,9 @@ class LoginViewModel(private val iniciarSesion: IniciarSesionUseCase) : ViewMode
             errorClave = error.errores["password"],
             mensaje = if (error.errores.isEmpty()) error.mensaje else null
         )
-        is ErrorApi.NoAutorizado -> s.copy(mensaje = "Usuario o contrasena incorrectos")
-        ErrorApi.SinConexion -> s.copy(mensaje = "No hay conexion con el servidor. Verifique su red e intente de nuevo.")
-        ErrorApi.TiempoAgotado -> s.copy(mensaje = "El servidor no respondio a tiempo. Intente de nuevo.")
+        is ErrorApi.NoAutorizado -> s.copy(mensaje = "Usuario o contraseña incorrectos")
+        ErrorApi.SinConexion -> s.copy(mensaje = "No hay conexión con el servidor. Verifique su red e intente de nuevo.")
+        ErrorApi.TiempoAgotado -> s.copy(mensaje = "El servidor no respondió a tiempo. Intente de nuevo.")
         is ErrorApi.Servidor -> s.copy(mensaje = "El servidor tuvo un problema. Intente de nuevo.")
         else -> s.copy(mensaje = error.message)
     }

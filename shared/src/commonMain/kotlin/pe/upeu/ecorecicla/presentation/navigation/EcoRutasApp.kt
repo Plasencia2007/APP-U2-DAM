@@ -1,5 +1,6 @@
 package pe.upeu.ecorecicla.presentation.navigation
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.CircularProgressIndicator
@@ -9,6 +10,8 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import pe.upeu.ecorecicla.presentation.theme.Paleta
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import org.koin.compose.koinInject
 import org.koin.compose.viewmodel.koinViewModel
@@ -26,15 +29,15 @@ import pe.upeu.ecorecicla.presentation.theme.TemaEcoRutas
 @Composable
 fun EcoRutasApp() {
     TemaEcoRutas {
-        Surface(Modifier.fillMaxSize()) {
+        Surface(Modifier.fillMaxSize(), color = androidx.compose.material3.MaterialTheme.colorScheme.background) {
             val sesionVm: SesionViewModel = koinViewModel()
             val navegador: Navegador = koinInject()
             val estado by sesionVm.estado.collectAsStateWithLifecycle()
             val pila by navegador.pila.collectAsStateWithLifecycle()
 
             when (val e = estado) {
-                EstadoSesion.Verificando -> Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                    CircularProgressIndicator()
+                EstadoSesion.Verificando -> Box(Modifier.fillMaxSize().background(Paleta.Bosque), contentAlignment = Alignment.Center) {
+                    CircularProgressIndicator(color = Color.White)
                 }
                 is EstadoSesion.SinSesion -> {
                     LaunchedEffect(Unit) { navegador.reiniciar() }
