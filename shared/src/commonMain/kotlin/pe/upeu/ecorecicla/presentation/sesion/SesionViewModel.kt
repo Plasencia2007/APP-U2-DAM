@@ -35,7 +35,7 @@ class SesionViewModel(
         when {
             !listo -> EstadoSesion.Verificando
             sesion != null -> EstadoSesion.Activa(sesion)
-            vencida -> EstadoSesion.SinSesion("Su sesion vencio. Inicie sesion nuevamente.")
+            vencida -> EstadoSesion.SinSesion("Su sesión venció. Inicie sesión nuevamente.")
             else -> EstadoSesion.SinSesion()
         }
     }.stateIn(viewModelScope, SharingStarted.Eagerly, EstadoSesion.Verificando)

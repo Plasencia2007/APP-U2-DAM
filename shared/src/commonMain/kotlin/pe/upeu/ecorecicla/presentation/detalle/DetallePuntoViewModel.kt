@@ -42,6 +42,8 @@ data class DetalleUiState(
     val punto: PuntoAcopio? = null,
     val rutaId: Long = 0,
     val rutaCerrada: Boolean = false,
+    val totalParadas: Int = 0,
+    val netoPunto: Double = 0.0,
     val pesajes: List<PesajeUi> = emptyList(),
     val puedeRegistrar: Boolean = false,
     val procesando: Boolean = false,
@@ -78,6 +80,8 @@ class DetallePuntoViewModel(
                         punto = punto,
                         rutaId = ruta?.id ?: 0,
                         rutaCerrada = cerrada,
+                        totalParadas = ruta?.avance?.size ?: 0,
+                        netoPunto = pesajes.filter { it.estado is pe.upeu.ecorecicla.domain.model.EstadoPesaje.Registrado }.sumOf { it.pesoNeto },
                         puedeRegistrar = permisos.puedeRegistrar(sesion) && !cerrada && ruta != null,
                         pesajes = pesajes.map { p ->
                             PesajeUi(
@@ -109,7 +113,7 @@ class DetallePuntoViewModel(
                 is Resultado.Exito -> _estado.update {
                     it.copy(procesando = false, mensaje = when (r.valor) {
                         is RegistroPesaje.Enviado -> "Pesaje anulado"
-                        is RegistroPesaje.Pendiente -> "Anulacion guardada sin conexion: se enviara al sincronizar"
+                        is RegistroPesaje.Pendiente -> "Anulación guardada sin conexión: se enviará al sincronizar"
                     })
                 }
                 is Resultado.Fallo -> {

@@ -1,7 +1,9 @@
 package pe.upeu.ecorecicla
 
 import android.os.Bundle
+import android.graphics.Color
 import androidx.activity.ComponentActivity
+import androidx.activity.SystemBarStyle
 import androidx.activity.OnBackPressedCallback
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -14,7 +16,8 @@ class MainActivity : ComponentActivity() {
     private val navegador: Navegador by inject()
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        enableEdgeToEdge()
+        // Los encabezados son verde bosque: iconos claros en la barra de estado.
+        enableEdgeToEdge(statusBarStyle = SystemBarStyle.dark(Color.TRANSPARENT))
         super.onCreate(savedInstanceState)
 
         // El boton Atras de Android recorre la pila de navegacion; en la pantalla raiz cierra la app.

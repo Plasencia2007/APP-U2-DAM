@@ -34,11 +34,14 @@ data class RutaUiState(
     val sincronizando: Boolean = false,
     val conectado: Boolean = true,
     val puedeCerrarRuta: Boolean = false,
+    val nombreUsuario: String = "",
     val mensaje: String? = null,
     val error: MensajeError? = null
 ) {
     val vacia: Boolean get() = !cargando && (ruta == null || ruta.puntos.isEmpty())
-    val pesados: Int get() = ruta?.puntos?.count { it.atendido } ?: 0
+    val pesados: Int get() = ruta?.pesados ?: 0
+    val totalParadas: Int get() = ruta?.avance?.size ?: 0
+    val completa: Boolean get() = totalParadas > 0 && pesados == totalParadas
 }
 
 /**
@@ -71,7 +74,9 @@ class RutaViewModel(
             observarUltimaSincronizacion().collect { fecha -> _estado.update { it.copy(ultimaSincronizacion = fecha) } }
         }
         viewModelScope.launch {
-            observarSesion().collect { s -> _estado.update { it.copy(puedeCerrarRuta = permisos.puedeCerrarRuta(s)) } }
+            observarSesion().collect { s ->
+                _estado.update { it.copy(puedeCerrarRuta = permisos.puedeCerrarRuta(s), nombreUsuario = s?.nombre.orEmpty()) }
+            }
         }
         // Sincronizacion automatica al recuperar la conexion (transicion sin red -> con red).
         viewModelScope.launch {

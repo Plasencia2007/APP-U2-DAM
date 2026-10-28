@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Icono de EcoRutas: una ruta en S que va del punto de partida (blanco) hasta una parada
+  marcada con un pin (ambar). Todo dentro del circulo seguro de 66 dp del icono adaptativo.
+-->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <!-- Trazo de la ruta -->
+    <path
+        android:fillColor="#00000000"
+        android:pathData="M39,71 C39,58 66,66 66,54"
+        android:strokeColor="#7FD3A8"
+        android:strokeLineCap="round"
+        android:strokeWidth="5" />
+    <!-- Punto de partida -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M39,71m-5.5,0a5.5,5.5 0,1 1,11 0a5.5,5.5 0,1 1,-11 0" />
+    <!-- Pin de la parada -->
+    <path
+        android:fillColor="#E8A317"
+        android:pathData="M66,56 C66,56 55,46 55,39.5 A11,11 0,1 1,77 39.5 C77,46 66,56 66,56 Z" />
+    <path
+        android:fillColor="#0F3D2E"
+        android:pathData="M66,39.5m-4.5,0a4.5,4.5 0,1 1,9 0a4.5,4.5 0,1 1,-9 0" />
+</vector>

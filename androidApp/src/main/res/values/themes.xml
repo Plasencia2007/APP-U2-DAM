@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Tema de la ventana: fondo verde bosque mientras arranca Compose, sin destello blanco. -->
+    <style name="Theme.EcoRutas" parent="android:Theme.Material.Light.NoActionBar">
+        <item name="android:windowBackground">@color/bosque</item>
+        <item name="android:statusBarColor">@android:color/transparent</item>
+    </style>
+
+    <color name="bosque">#0F3D2E</color>
+</resources>

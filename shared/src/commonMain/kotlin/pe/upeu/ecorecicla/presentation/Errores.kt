@@ -13,24 +13,41 @@ data class MensajeError(val texto: String, val reintentable: Boolean = false)
  */
 fun ErrorApi.aMensaje(): MensajeError? = when (this) {
     is ErrorApi.NoAutorizado -> null
-    is ErrorApi.SinPrivilegio -> MensajeError("Operacion no autorizada: su usuario no tiene el privilegio necesario")
+    is ErrorApi.SinPrivilegio -> MensajeError("Operación no autorizada: su usuario no tiene el privilegio necesario")
     is ErrorApi.NoEncontrado -> MensajeError("$mensaje. Se actualizo el listado.")
     is ErrorApi.Conflicto -> MensajeError(mensaje)
     is ErrorApi.Validacion -> MensajeError(mensaje)
     is ErrorApi.Servidor -> MensajeError("Error del servidor. Intente nuevamente.", reintentable = true)
-    ErrorApi.SinConexion -> MensajeError("Sin conexion con el servidor. Se trabaja con los datos guardados en el equipo.")
-    ErrorApi.TiempoAgotado -> MensajeError("El servidor tardo demasiado en responder.", reintentable = true)
+    ErrorApi.SinConexion -> MensajeError("Sin conexión con el servidor. Se trabaja con los datos guardados en el equipo.")
+    ErrorApi.TiempoAgotado -> MensajeError("El servidor tardó demasiado en responder.", reintentable = true)
     is ErrorApi.Desconocido -> MensajeError(detalle, reintentable = true)
 }
 
-/** Formatea "2026-10-28T09:14:22" como "28/10 09:14". */
-fun fechaCorta(iso: String?): String {
+private val MESES = listOf("enero", "febrero", "marzo", "abril", "mayo", "junio", "julio", "agosto",
+    "septiembre", "octubre", "noviembre", "diciembre")
+
+/** "2026-10-28T09:14:22" -> "hoy 09:14" o "28/10 09:14". */
+fun fechaCorta(iso: String?, hoy: String? = null): String {
     if (iso == null || iso.length < 16) return "nunca"
-    return "${iso.substring(8, 10)}/${iso.substring(5, 7)} ${iso.substring(11, 16)}"
+    val hora = iso.substring(11, 16)
+    if (hoy != null && iso.startsWith(hoy)) return "hoy $hora"
+    return "${iso.substring(8, 10)}/${iso.substring(5, 7)} $hora"
 }
 
-fun kg(valor: Double): String {
-    val redondeado = kotlin.math.round(valor * 100) / 100
-    val texto = redondeado.toString()
-    return (if (texto.endsWith(".0")) texto.dropLast(2) else texto) + " kg"
+/** Solo la hora: "09:14". */
+fun hora(iso: String): String = if (iso.length >= 16) iso.substring(11, 16) else iso
+
+/** "2026-10-28" -> "28 de octubre". */
+fun fechaLarga(fecha: String): String {
+    val mes = fecha.substring(5, 7).toIntOrNull() ?: return fecha
+    return "${fecha.substring(8, 10).trimStart('0')} de ${MESES[mes - 1]}"
 }
+
+/** 45.0 -> "45", 45.5 -> "45,5", 1234.25 -> "1234,25" (coma decimal, como en Peru). */
+fun numeroKg(valor: Double): String {
+    val redondeado = kotlin.math.round(valor * 100) / 100
+    val texto = redondeado.toString().removeSuffix(".0")
+    return texto.replace('.', ',')
+}
+
+fun kg(valor: Double): String = numeroKg(valor) + " kg"

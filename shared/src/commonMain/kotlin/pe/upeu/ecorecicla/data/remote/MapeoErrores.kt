@@ -50,11 +50,11 @@ suspend fun <T> traducir(respuesta: HttpResponse, convertir: suspend (HttpRespon
     val mensaje = error?.mensaje
     return Resultado.Fallo(
         when (codigo) {
-            400 -> ErrorApi.Validacion(mensaje ?: "Datos invalidos", error?.erroresDeValidacion.orEmpty())
-            401 -> ErrorApi.NoAutorizado(mensaje ?: "Su sesion vencio. Inicie sesion nuevamente")
-            403 -> ErrorApi.SinPrivilegio(mensaje ?: "No tiene permiso para realizar esta operacion")
+            400 -> ErrorApi.Validacion(mensaje ?: "Datos inválidos", error?.erroresDeValidacion.orEmpty())
+            401 -> ErrorApi.NoAutorizado(mensaje ?: "Su sesión venció. Inicie sesión nuevamente")
+            403 -> ErrorApi.SinPrivilegio(mensaje ?: "No tiene permiso para realizar esta operación")
             404 -> ErrorApi.NoEncontrado(mensaje ?: "El recurso ya no existe")
-            409 -> ErrorApi.Conflicto(mensaje ?: "La operacion entra en conflicto con el estado del servidor")
+            409 -> ErrorApi.Conflicto(mensaje ?: "La operación entra en conflicto con el estado del servidor")
             in 500..599 -> ErrorApi.Servidor(codigo)
             else -> ErrorApi.Desconocido("Respuesta inesperada del servidor ($codigo)")
         }

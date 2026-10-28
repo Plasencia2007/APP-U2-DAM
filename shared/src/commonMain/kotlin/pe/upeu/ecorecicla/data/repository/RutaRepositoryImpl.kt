@@ -2,10 +2,12 @@ package pe.upeu.ecorecicla.data.repository
 
 import app.cash.sqldelight.coroutines.asFlow
 import app.cash.sqldelight.coroutines.mapToList
+import app.cash.sqldelight.coroutines.mapToOne
 import app.cash.sqldelight.coroutines.mapToOneOrNull
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
@@ -36,13 +38,19 @@ class RutaRepositoryImpl(
             if (fila == null) {
                 flowOf(null)
             } else {
-                q.puntosDeRuta(fila.id, busqueda).asFlow().mapToList(io).map { puntos ->
+                combine(
+                    q.puntosDeRuta(fila.id, busqueda).asFlow().mapToList(io),
+                    q.puntosDeRuta(fila.id, "").asFlow().mapToList(io),
+                    q.netoTotalRuta(fila.id).asFlow().mapToOne(io)
+                ) { filtrados, todos, neto ->
                     Ruta(
                         id = fila.id,
                         fecha = fila.fecha,
                         estado = if (fila.estado == "CERRADA") EstadoRuta.CERRADA else EstadoRuta.ABIERTA,
                         operario = fila.operario,
-                        puntos = puntos.map { it.aDominio() }
+                        puntos = filtrados.map { it.aDominio() },
+                        netoTotal = neto,
+                        avance = todos.map { it.atendido }
                     )
                 }
             }
