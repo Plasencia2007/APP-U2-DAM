@@ -40,7 +40,8 @@ CREATE TABLE pesaje (
     pendiente INTEGER AS kotlin.Boolean NOT NULL DEFAULT 0,   -- marca de pendiente por fila
     operacion TEXT,                    -- CREAR | EDITAR | ANULAR mientras esta pendiente
     clave_cliente TEXT,                -- UUID que evita duplicados si se reenvia
-    error_sync TEXT                    -- motivo si el servicio rechazo el pendiente
+    error_sync TEXT,                   -- motivo si el servicio rechazo el pendiente
+    humedad_estimada REAL              -- SC-C: humedad estimada en %
 );
 
 CREATE INDEX pesaje_punto ON pesaje(punto_id);
@@ -121,13 +122,14 @@ SELECT MIN(-1, COALESCE(MIN(id), 0) - 1) FROM pesaje;
 
 insertarPesaje:
 INSERT OR REPLACE INTO pesaje(id, punto_id, ruta_id, fecha_hora, material, peso_bruto, tara, peso_neto, operario,
-                              observacion, estado, motivo_anulacion, pendiente, operacion, clave_cliente, error_sync)
-VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
+                              observacion, estado, motivo_anulacion, pendiente, operacion, clave_cliente, error_sync,
+                              humedad_estimada)
+VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
 
 corregirLocal:
 UPDATE pesaje
 SET material = :material, peso_bruto = :pesoBruto, tara = :tara, peso_neto = :pesoNeto, observacion = :observacion,
-    pendiente = 1, operacion = :operacion, error_sync = NULL
+    humedad_estimada = :humedadEstimada, pendiente = 1, operacion = :operacion, error_sync = NULL
 WHERE id = :id;
 
 anularLocal:

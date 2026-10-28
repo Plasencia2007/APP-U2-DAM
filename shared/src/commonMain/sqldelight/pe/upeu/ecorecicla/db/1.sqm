@@ -1,0 +1,2 @@
+-- SC-C: version 1 -> 2. Los equipos que ya tenian la base agregan la columna sin perder datos.
+ALTER TABLE pesaje ADD COLUMN humedad_estimada REAL;

@@ -57,7 +57,8 @@ class PesajeRepositoryImpl(
     override suspend fun registrar(puntoId: Long, rutaId: Long, datos: DatosPesaje): Resultado<RegistroPesaje> {
         val clave = Uuid.random().toString()
         if (red.conectado.value) {
-            val peticion = PesajePeticionDto(rutaId, datos.material, datos.pesoBruto, datos.tara, datos.observacion, clave)
+            val peticion = PesajePeticionDto(rutaId, datos.material, datos.pesoBruto, datos.tara, datos.observacion, clave,
+                datos.humedadEstimada)
             when (val r = api.registrarPesaje(puntoId, peticion)) {
                 is Resultado.Exito -> {
                     val definitivo = r.valor.aDominio()
@@ -82,7 +83,8 @@ class PesajeRepositoryImpl(
                     estado = EstadoPesaje.Registrado,
                     pendiente = true,
                     rutaId = rutaId,
-                    observacion = datos.observacion
+                    observacion = datos.observacion,
+                    humedadEstimada = datos.humedadEstimada
                 )
                 db.guardarPesaje(p, Operacion.CREAR, clave)
                 p
@@ -98,7 +100,7 @@ class PesajeRepositoryImpl(
             return Resultado.Exito(RegistroPesaje.Pendiente(guardarCorreccionLocal(actual, datos, Operacion.CREAR)))
         }
         if (red.conectado.value) {
-            val peticion = CorreccionPesajeDto(datos.material, datos.pesoBruto, datos.tara, datos.observacion)
+            val peticion = CorreccionPesajeDto(datos.material, datos.pesoBruto, datos.tara, datos.observacion, datos.humedadEstimada)
             when (val r = api.corregirPesaje(pesajeId, peticion)) {
                 is Resultado.Exito -> {
                     val definitivo = r.valor.aDominio()
@@ -137,9 +139,10 @@ class PesajeRepositoryImpl(
     private suspend fun guardarCorreccionLocal(actual: Pesaje, datos: DatosPesaje, operacion: String): Pesaje =
         withContext(io) {
             val neto = netoProvisional(datos)
-            q.corregirLocal(datos.material, datos.pesoBruto, datos.tara, neto, datos.observacion, operacion, actual.id)
+            q.corregirLocal(datos.material, datos.pesoBruto, datos.tara, neto, datos.observacion, datos.humedadEstimada,
+                operacion, actual.id)
             actual.copy(material = datos.material, pesoBruto = datos.pesoBruto, tara = datos.tara, pesoNeto = neto,
-                observacion = datos.observacion, pendiente = true)
+                observacion = datos.observacion, humedadEstimada = datos.humedadEstimada, pendiente = true)
         }
 
     private fun netoProvisional(d: DatosPesaje): Double = round((d.pesoBruto - d.tara) * 1000) / 1000

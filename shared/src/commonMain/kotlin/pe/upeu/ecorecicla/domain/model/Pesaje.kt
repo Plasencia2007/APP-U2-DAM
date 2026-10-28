@@ -15,5 +15,7 @@ data class Pesaje(
     val pendiente: Boolean,
     val rutaId: Long = 0,
     val observacion: String? = null,
-    val errorSincronizacion: String? = null
+    val errorSincronizacion: String? = null,
+    /** SC-C: humedad estimada del material, en porcentaje (0 a 100). */
+    val humedadEstimada: Double? = null
 )

@@ -37,7 +37,8 @@ fun FilaPesaje.aDominio(): Pesaje = Pesaje(
     pendiente = pendiente,
     rutaId = ruta_id,
     observacion = observacion,
-    errorSincronizacion = error_sync
+    errorSincronizacion = error_sync,
+    humedadEstimada = humedad_estimada
 )
 
 fun PuntosDeRuta.aDominio(): PuntoAcopio = PuntoAcopio(
@@ -81,7 +82,8 @@ fun EcoDb.guardarPesaje(p: Pesaje, operacion: String? = null, claveCliente: Stri
         pendiente = p.pendiente,
         operacion = operacion,
         clave_cliente = claveCliente,
-        error_sync = p.errorSincronizacion
+        error_sync = p.errorSincronizacion,
+        humedad_estimada = p.humedadEstimada
     )
 }
 
