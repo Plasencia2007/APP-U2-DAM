@@ -106,6 +106,8 @@ La app recibe los privilegios en el login y los guarda con la sesión. `Permisos
 | Anular | `PESAJE_ANULAR` | — | ✔ | — |
 | Cerrar ruta | `RUTA_CERRAR` | — | ✔ | — |
 
+> **SC-B (AUDITOR):** la app no necesitó cambios de código: el auditor recibe solo `PUNTO_LEER` y `PESAJE_LEER`, así que `PermisosUseCase` no le ofrece registrar, corregir, anular ni cerrar. Lo garantiza la prueba `PermisosAuditorTest`.
+
 > Ocultar el botón es **experiencia de usuario**, no seguridad: el backend vuelve a verificar el privilegio y responde **403** aunque se invoque directamente.
 
 ---
