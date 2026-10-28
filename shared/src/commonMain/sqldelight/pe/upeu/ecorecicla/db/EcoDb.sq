@@ -77,6 +77,10 @@ WHERE p.ruta_id = :rutaId
   AND (:busqueda = '' OR p.razon_social LIKE '%' || :busqueda || '%' OR p.zona LIKE '%' || :busqueda || '%')
 ORDER BY p.secuencia;
 
+-- Kilos netos recolectados en la ruta (pesajes vigentes, incluidos los pendientes de envio).
+netoTotalRuta:
+SELECT CAST(COALESCE(SUM(peso_neto), 0) AS REAL) AS neto FROM pesaje WHERE ruta_id = :rutaId AND estado = 'REGISTRADO';
+
 puntoPorId:
 SELECT p.*,
        EXISTS (SELECT 1 FROM pesaje s
