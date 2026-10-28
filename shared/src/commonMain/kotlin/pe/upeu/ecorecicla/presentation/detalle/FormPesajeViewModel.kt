@@ -25,6 +25,8 @@ data class FormPesajeUiState(
     val pesoBruto: String = "",
     val tara: String = "",
     val observacion: String = "",
+    /** SC-C: humedad estimada en % (opcional). */
+    val humedad: String = "",
     /** Mensaje bajo cada campo: de la validacion local o de validationErrors del servicio. */
     val errores: Map<String, String> = emptyMap(),
     val enviando: Boolean = false,
@@ -59,7 +61,8 @@ class FormPesajeViewModel(
                 obtener(pesajeId)?.let { p ->
                     _estado.update {
                         it.copy(material = p.material, pesoBruto = p.pesoBruto.toString(), tara = p.tara.toString(),
-                            observacion = p.observacion.orEmpty())
+                            observacion = p.observacion.orEmpty(),
+                            humedad = p.humedadEstimada?.let { numeroKg(it) }.orEmpty())
                     }
                 }
             }
@@ -69,6 +72,7 @@ class FormPesajeViewModel(
     fun cambiarMaterial(v: String) = _estado.update { it.copy(material = v, errores = it.errores - "material") }
     fun cambiarBruto(v: String) = _estado.update { it.copy(pesoBruto = v, errores = it.errores - "pesoBruto") }
     fun cambiarTara(v: String) = _estado.update { it.copy(tara = v, errores = it.errores - "tara") }
+    fun cambiarHumedad(v: String) = _estado.update { it.copy(humedad = v, errores = it.errores - "humedadEstimada") }
     fun cambiarObservacion(v: String) = _estado.update { it.copy(observacion = v, errores = it.errores - "observacion") }
 
     fun guardar() {
@@ -77,9 +81,9 @@ class FormPesajeViewModel(
         _estado.update { it.copy(enviando = true, error = null) }
         viewModelScope.launch {
             val r = if (s.pesajeId == null) {
-                registrar(s.puntoId, s.rutaId, s.material, s.pesoBruto, s.tara, s.observacion)
+                registrar(s.puntoId, s.rutaId, s.material, s.pesoBruto, s.tara, s.observacion, s.humedad)
             } else {
-                corregir(s.pesajeId, s.material, s.pesoBruto, s.tara, s.observacion)
+                corregir(s.pesajeId, s.material, s.pesoBruto, s.tara, s.observacion, s.humedad)
             }
             when (r) {
                 is Resultado.Exito -> _estado.update {

@@ -108,6 +108,11 @@ fun FormPesajeScreen(
                 ResultadoNeto(estado.netoEstimado)
             }
 
+            Seccion("Humedad estimada") {
+                CampoPeso("Humedad del material", estado.humedad, vm::cambiarHumedad, estado.errores["humedadEstimada"],
+                    Modifier.fillMaxWidth(), sufijo = "%")
+            }
+
             Seccion("Observación") {
                 CampoTexto("Opcional: estado del material, acceso, etc.", estado.observacion, vm::cambiarObservacion,
                     estado.errores["observacion"])
@@ -162,12 +167,14 @@ private fun BotonMaterial(m: String, seleccionado: Boolean, alPulsar: () -> Unit
 }
 
 @Composable
-private fun CampoPeso(etiqueta: String, valor: String, alCambiar: (String) -> Unit, error: String?, modifier: Modifier) {
+private fun CampoPeso(
+    etiqueta: String, valor: String, alCambiar: (String) -> Unit, error: String?, modifier: Modifier, sufijo: String = "kg"
+) {
     OutlinedTextField(
         value = valor,
         onValueChange = alCambiar,
         label = { Text(etiqueta) },
-        suffix = { Text("kg") },
+        suffix = { Text(sufijo) },
         singleLine = true,
         textStyle = MaterialTheme.typography.headlineSmall,
         isError = error != null,
