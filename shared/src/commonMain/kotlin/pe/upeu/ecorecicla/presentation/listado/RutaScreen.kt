@@ -37,6 +37,8 @@ import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Sync
 import androidx.compose.material.icons.filled.WarningAmber
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Badge
+import androidx.compose.material3.BadgedBox
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -185,7 +187,7 @@ private fun Encabezado(estado: RutaUiState, alSincronizar: () -> Unit, alAbrirPe
                     Text(estado.nombreUsuario, style = MaterialTheme.typography.bodyMedium, color = Color.White.copy(alpha = 0.75f))
                 }
             }
-            BotonSincronizar(estado.sincronizando, alSincronizar)
+            BotonSincronizar(estado.sincronizando, estado.pendientesPorEnviar, alSincronizar)
             Avatar(estado.nombreUsuario, alAbrirPerfil)
         }
 
@@ -215,23 +217,38 @@ private fun Encabezado(estado: RutaUiState, alSincronizar: () -> Unit, alAbrirPe
         }
         Spacer(Modifier.height(14.dp))
         EstadoSenal(estado.conectado, estado.ultimaSincronizacion, hoy = ruta?.fecha)
+        if (estado.pendientesPorEnviar > 0) {
+            Text(
+                if (estado.pendientesPorEnviar == 1L) "1 pesaje por enviar" else "${estado.pendientesPorEnviar} pesajes por enviar",
+                style = MaterialTheme.typography.labelMedium,
+                color = Paleta.Ambar,
+                modifier = Modifier.padding(top = 8.dp, start = 4.dp)
+            )
+        }
     }
 }
 
 @Composable
-private fun BotonSincronizar(sincronizando: Boolean, alPulsar: () -> Unit) {
+private fun BotonSincronizar(sincronizando: Boolean, pendientes: Long, alPulsar: () -> Unit) {
     val giro = rememberInfiniteTransition()
     val angulo by giro.animateFloat(
         initialValue = 0f, targetValue = -360f,
         animationSpec = infiniteRepeatable(tween(900, easing = LinearEasing), RepeatMode.Restart)
     )
     IconButton(onClick = alPulsar, enabled = !sincronizando) {
-        Icon(
-            Icons.Filled.Sync,
-            contentDescription = "Sincronizar ahora",
-            tint = Color.White,
-            modifier = if (sincronizando) Modifier.rotate(angulo) else Modifier
-        )
+        // SC-D: distintivo con los pesajes pendientes de sincronizar.
+        BadgedBox(badge = {
+            if (pendientes > 0) {
+                Badge(containerColor = Paleta.Ambar, contentColor = Paleta.Carbon) { Text("$pendientes") }
+            }
+        }) {
+            Icon(
+                Icons.Filled.Sync,
+                contentDescription = if (pendientes > 0) "Sincronizar ahora, $pendientes pendientes" else "Sincronizar ahora",
+                tint = Color.White,
+                modifier = if (sincronizando) Modifier.rotate(angulo) else Modifier
+            )
+        }
     }
 }
 
