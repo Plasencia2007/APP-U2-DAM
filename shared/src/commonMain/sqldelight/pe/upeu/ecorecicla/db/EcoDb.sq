@@ -111,6 +111,11 @@ SELECT * FROM pesaje WHERE id = :id;
 pendientes:
 SELECT * FROM pesaje WHERE pendiente = 1 ORDER BY fecha_hora ASC, id DESC;
 
+-- SC-D: cuantos pesajes faltan enviar. Al ser observable, el distintivo se actualiza solo
+-- cuando cambia la tabla: al registrar sin red o al sincronizar.
+contarPendientes:
+SELECT COUNT(*) FROM pesaje WHERE pendiente = 1;
+
 idsPendientes:
 SELECT id FROM pesaje WHERE pendiente = 1;
 

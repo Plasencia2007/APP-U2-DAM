@@ -12,6 +12,11 @@ class ObservarPesajesUseCase(private val pesajes: PesajeRepository) {
     operator fun invoke(puntoId: Long): Flow<List<Pesaje>> = pesajes.observarPesajes(puntoId)
 }
 
+/** SC-D: pendientes de sincronizar; viene de una consulta observable, no de un contador en memoria. */
+class ObservarPendientesUseCase(private val pesajes: PesajeRepository) {
+    operator fun invoke(): Flow<Long> = pesajes.observarPendientes()
+}
+
 class ObtenerPesajeUseCase(private val pesajes: PesajeRepository) {
     suspend operator fun invoke(pesajeId: Long): Pesaje? = pesajes.obtener(pesajeId)
 }
