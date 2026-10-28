@@ -1,0 +1,159 @@
+-- Esquema local derivado del modelo de dominio (seccion 4.5 y 4.6).
+-- La interfaz lee SIEMPRE de estas tablas mediante consultas observables (asFlow).
+
+-- Ruta del dia descargada del servicio.
+CREATE TABLE ruta (
+    id INTEGER NOT NULL PRIMARY KEY,
+    fecha TEXT NOT NULL,
+    estado TEXT NOT NULL,              -- ABIERTA | CERRADA
+    operario TEXT NOT NULL
+);
+
+-- Puntos de acopio de la ruta, con su orden de visita.
+CREATE TABLE punto_ruta (
+    id INTEGER NOT NULL,               -- id del punto de acopio en el servicio
+    ruta_id INTEGER NOT NULL,
+    razon_social TEXT NOT NULL,
+    direccion TEXT NOT NULL,
+    zona TEXT NOT NULL,
+    material_habitual TEXT NOT NULL,
+    secuencia INTEGER NOT NULL,
+    omitido INTEGER AS kotlin.Boolean NOT NULL DEFAULT 0,
+    PRIMARY KEY (ruta_id, id)
+);
+
+-- Pesajes. "id" es el definitivo del servicio (> 0) o uno PROVISIONAL NEGATIVO mientras
+-- la fila no se haya enviado; el servicio nunca emite ids <= 0, asi que no hay colision.
+CREATE TABLE pesaje (
+    id INTEGER NOT NULL PRIMARY KEY,
+    punto_id INTEGER NOT NULL,
+    ruta_id INTEGER NOT NULL,
+    fecha_hora TEXT NOT NULL,
+    material TEXT NOT NULL,
+    peso_bruto REAL NOT NULL,
+    tara REAL NOT NULL,
+    peso_neto REAL NOT NULL,
+    operario TEXT NOT NULL,
+    observacion TEXT,
+    estado TEXT NOT NULL,              -- REGISTRADO | ANULADO
+    motivo_anulacion TEXT,
+    pendiente INTEGER AS kotlin.Boolean NOT NULL DEFAULT 0,   -- marca de pendiente por fila
+    operacion TEXT,                    -- CREAR | EDITAR | ANULAR mientras esta pendiente
+    clave_cliente TEXT,                -- UUID que evita duplicados si se reenvia
+    error_sync TEXT                    -- motivo si el servicio rechazo el pendiente
+);
+
+CREATE INDEX pesaje_punto ON pesaje(punto_id);
+CREATE INDEX pesaje_pendiente ON pesaje(pendiente);
+
+-- Pares clave/valor: ultima sincronizacion y usuario duenio de los datos locales.
+CREATE TABLE metadato (
+    clave TEXT NOT NULL PRIMARY KEY,
+    valor TEXT NOT NULL
+);
+
+-- ---------- Ruta ----------
+
+rutaActual:
+SELECT * FROM ruta ORDER BY fecha DESC, id DESC LIMIT 1;
+
+insertarRuta:
+INSERT OR REPLACE INTO ruta(id, fecha, estado, operario) VALUES (?, ?, ?, ?);
+
+cambiarEstadoRuta:
+UPDATE ruta SET estado = :estado WHERE id = :id;
+
+borrarRutasExcepto:
+DELETE FROM ruta WHERE id <> :rutaId;
+
+-- Puntos de la ruta en orden de visita. "atendido" se calcula con los pesajes LOCALES vigentes,
+-- asi un pesaje registrado sin senal marca el punto como pesado de inmediato.
+puntosDeRuta:
+SELECT p.*,
+       EXISTS (SELECT 1 FROM pesaje s
+               WHERE s.punto_id = p.id AND s.ruta_id = p.ruta_id AND s.estado = 'REGISTRADO') AS atendido
+FROM punto_ruta p
+WHERE p.ruta_id = :rutaId
+  AND (:busqueda = '' OR p.razon_social LIKE '%' || :busqueda || '%' OR p.zona LIKE '%' || :busqueda || '%')
+ORDER BY p.secuencia;
+
+puntoPorId:
+SELECT p.*,
+       EXISTS (SELECT 1 FROM pesaje s
+               WHERE s.punto_id = p.id AND s.ruta_id = p.ruta_id AND s.estado = 'REGISTRADO') AS atendido
+FROM punto_ruta p
+WHERE p.id = :puntoId
+ORDER BY p.ruta_id DESC
+LIMIT 1;
+
+insertarPunto:
+INSERT OR REPLACE INTO punto_ruta(id, ruta_id, razon_social, direccion, zona, material_habitual, secuencia, omitido)
+VALUES (?, ?, ?, ?, ?, ?, ?, ?);
+
+borrarPuntosExceptoRuta:
+DELETE FROM punto_ruta WHERE ruta_id <> :rutaId;
+
+borrarPuntosDeRuta:
+DELETE FROM punto_ruta WHERE ruta_id = :rutaId;
+
+-- ---------- Pesajes ----------
+
+pesajesDePunto:
+SELECT * FROM pesaje WHERE punto_id = :puntoId ORDER BY fecha_hora DESC, id DESC;
+
+pesajePorId:
+SELECT * FROM pesaje WHERE id = :id;
+
+pendientes:
+SELECT * FROM pesaje WHERE pendiente = 1 ORDER BY fecha_hora ASC, id DESC;
+
+idsPendientes:
+SELECT id FROM pesaje WHERE pendiente = 1;
+
+-- Siguiente id provisional: siempre negativo y menor que cualquiera existente.
+-- Con la tabla vacia, MIN(id) es NULL y COALESCE lo convierte en 0, de modo que devuelve -1.
+siguienteIdProvisional:
+SELECT MIN(-1, COALESCE(MIN(id), 0) - 1) FROM pesaje;
+
+insertarPesaje:
+INSERT OR REPLACE INTO pesaje(id, punto_id, ruta_id, fecha_hora, material, peso_bruto, tara, peso_neto, operario,
+                              observacion, estado, motivo_anulacion, pendiente, operacion, clave_cliente, error_sync)
+VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
+
+corregirLocal:
+UPDATE pesaje
+SET material = :material, peso_bruto = :pesoBruto, tara = :tara, peso_neto = :pesoNeto, observacion = :observacion,
+    pendiente = 1, operacion = :operacion, error_sync = NULL
+WHERE id = :id;
+
+anularLocal:
+UPDATE pesaje
+SET estado = 'ANULADO', motivo_anulacion = :motivo, pendiente = 1, operacion = 'ANULAR', error_sync = NULL
+WHERE id = :id;
+
+limpiarPendiente:
+UPDATE pesaje SET pendiente = 0, operacion = NULL, error_sync = NULL WHERE id = :id;
+
+marcarErrorSync:
+UPDATE pesaje SET error_sync = :error WHERE id = :id;
+
+borrarPesaje:
+DELETE FROM pesaje WHERE id = :id;
+
+borrarPesajesSincronizados:
+DELETE FROM pesaje WHERE pendiente = 0;
+
+-- ---------- Metadatos y limpieza ----------
+
+leerMetadato:
+SELECT valor FROM metadato WHERE clave = :clave;
+
+guardarMetadato:
+INSERT OR REPLACE INTO metadato(clave, valor) VALUES (?, ?);
+
+borrarTodo {
+    DELETE FROM pesaje;
+    DELETE FROM punto_ruta;
+    DELETE FROM ruta;
+    DELETE FROM metadato;
+}
